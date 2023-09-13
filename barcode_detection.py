@@ -35,25 +35,26 @@ def main():
                 
                 exp_barcode = mia_dict[i]["barcode_1"]
 
+                # First check whether the barcodes we're comparing are the same length
                 if (len(exp_barcode) == len(obs_barcode)):
                     # go through the different checks - we're running the function twice here - could just create the info message here
                     if isReverseComplemented(obs_barcode, exp_barcode) is not None:
-                        print(f"found one that's reverse complemented, obs {obs_barcode}, exp {exp_barcode}")
+                        #print(f"found one that's reverse complemented, obs {obs_barcode}, exp {exp_barcode}")
                         info_message = isReverseComplemented(obs_barcode, exp_barcode)  
                         break
 
                     if isReverse(obs_barcode, exp_barcode) is not None:
-                        print(f"found one that's reversed, obs {obs_barcode}, exp {exp_barcode}")
+                        #print(f"found one that's reversed, obs {obs_barcode}, exp {exp_barcode}")
                         info_message = isReverse(obs_barcode, exp_barcode)
                         break
 
                     if isComplemented(obs_barcode, exp_barcode) is not None:
-                        print(f"found one that's complemented, obs {obs_barcode}, exp {exp_barcode}")
+                        #print(f"found one that's complemented, obs {obs_barcode}, exp {exp_barcode}")
                         info_message = isComplemented(obs_barcode, exp_barcode)
                         break
 
                     if isOneMismatch(obs_barcode, exp_barcode) is not None:
-                        print(f"found one that's a potential typo, obs {obs_barcode}, exp {exp_barcode}")
+                        #print(f"found one that's a potential typo, obs {obs_barcode}, exp {exp_barcode}")
                         info_message = isOneMismatch(obs_barcode, exp_barcode)
                         break
                 else:
@@ -70,6 +71,7 @@ def main():
                     else:
                         print("shouldn't have got to here - do the barcodes not have a length?")
 
+                    # simple search of shorter barcode within longer barcode
                     if re.search(shorter_seq, longer_seq) is not None: # this only works by finding the smaller seq within the longer seq  
                         m = re.search(shorter_seq, longer_seq)
                         info_message = f"found shorter_seq {shorter_seq} in longer_seq {longer_seq}. {getExtraBases(m, longer_seq)}"
@@ -81,10 +83,17 @@ def main():
                         info_message = f"found reverse comp of shorter_seq {shorter_seq} - {reverseComplement(shorter_seq)} in longer_seq {longer_seq}. {getExtraBases(m, longer_seq)}"
                         break
 
+                    # try the reverse of the sequence
                     if re.search(reverseSeq(shorter_seq), longer_seq) is not None:
                         m = re.search(reverseSeq(shorter_seq), longer_seq)
                         info_message = f"found reverse of shorter_seq {shorter_seq} - {reverseSeq(shorter_seq)} in longer_seq {longer_seq}. {getExtraBases(m, longer_seq)}"
                         break  
+
+                    # try the complement of the sequence
+                    if re.search(complementSeq(shorter_seq), longer_seq) is not None:
+                        m = re.search(complementSeq(shorter_seq), longer_seq)
+                        info_message = f"found complement of shorter_seq {shorter_seq} - {complementSeq(shorter_seq)} in longer_seq {longer_seq}. {getExtraBases(m, longer_seq)}"
+                        break
 
             if info_message is not None:
                 print(f"found an explanation: {info_message}, MIA seq i = {i}")
