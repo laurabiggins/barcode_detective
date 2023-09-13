@@ -232,18 +232,18 @@ def isDual(seq):
     if "_" in seq:
         return True
     
-def reverseComplement(seq):
-    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', '_': '_'}
-    reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
-    return reverse_complement
-
 def reverseSeq(seq):
     return seq[::-1]
 
 def complementSeq(seq):
-    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', '_': '_'}
+    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', '_': '_', 'N': 'N'}
     complemented_seq = "".join(complement.get(base, base) for base in seq)
     return complemented_seq
+
+def reverseComplement(seq):
+    complement = complementSeq(seq)
+    reverse_complement = reverseSeq(complement)
+    return reverse_complement
 
 def isReverse(observed_seq, expected_seq):
     reversed_seq = reverseSeq(observed_seq)
