@@ -128,20 +128,16 @@ def checkPhiX(observed_dict):
         observed_seq = value["full_barcode"]
         m = p.search(observed_seq)
 
-        if m is not None:
-            value["explained"] = True
-            value["sierra"] = False
-            value["info"] = f"found polyG: {observed_seq}"
-
-        # Also check rev comp of sequence
-        pattern = 'CGGCATAC'
-        p = re.compile(pattern)
-        m = p.search(observed_seq)
+        if m is None:
+            # Also check rev comp of sequence
+            pattern = 'CGGCATAC'
+            p = re.compile(pattern)
+            m = p.search(observed_seq)
 
         if m is not None:
             value["explained"] = True
             value["sierra"] = False
-            value["info"] = f"found polyG: {observed_seq}"
+            value["info"] = f"found phiX: {observed_seq}"
 
     return(observed_dict)
 
