@@ -35,29 +35,59 @@ def main():
                 
                 exp_barcode = mia_dict[i]["barcode_1"]
 
-                # go through the different checks
-                if isReverseComplemented(obs_barcode, exp_barcode) is not None:
-                    print(f"found one that's reverse complemented, obs {obs_barcode}, exp {exp_barcode}")
-                    info_message = isReverseComplemented(obs_barcode, exp_barcode)
-                    break
+                if (len(exp_barcode) == len(obs_barcode)):
+                    # go through the different checks - we're running the function twice here - could just create the info message here
+                    if isReverseComplemented(obs_barcode, exp_barcode) is not None:
+                        print(f"found one that's reverse complemented, obs {obs_barcode}, exp {exp_barcode}")
+                        info_message = isReverseComplemented(obs_barcode, exp_barcode)  
+                        break
 
-                if isReverse(obs_barcode, exp_barcode) is not None:
-                    print(f"found one that's reversed, obs {obs_barcode}, exp {exp_barcode}")
-                    info_message = isReverse(obs_barcode, exp_barcode)
-                    break
+                    if isReverse(obs_barcode, exp_barcode) is not None:
+                        print(f"found one that's reversed, obs {obs_barcode}, exp {exp_barcode}")
+                        info_message = isReverse(obs_barcode, exp_barcode)
+                        break
 
-                if isComplemented(obs_barcode, exp_barcode) is not None:
-                    print(f"found one that's complemented, obs {obs_barcode}, exp {exp_barcode}")
-                    info_message = isComplemented(obs_barcode, exp_barcode)
-                    break
+                    if isComplemented(obs_barcode, exp_barcode) is not None:
+                        print(f"found one that's complemented, obs {obs_barcode}, exp {exp_barcode}")
+                        info_message = isComplemented(obs_barcode, exp_barcode)
+                        break
 
-                if isOneMismatch(obs_barcode, exp_barcode) is not None:
-                    print(f"found one that's a potential typo, obs {obs_barcode}, exp {exp_barcode}")
-                    info_message = isOneMismatch(obs_barcode, exp_barcode)
-                    break
+                    if isOneMismatch(obs_barcode, exp_barcode) is not None:
+                        print(f"found one that's a potential typo, obs {obs_barcode}, exp {exp_barcode}")
+                        info_message = isOneMismatch(obs_barcode, exp_barcode)
+                        break
+                else:
+                    if (len(exp_barcode) < len(obs_barcode)):
+                        shorter_seq = exp_barcode
+                        longer_seq = obs_barcode
+                        print("sequences are different lengths")
+
+                    elif (len(exp_barcode) > len(obs_barcode)):
+                        shorter_seq = obs_barcode
+                        longer_seq = exp_barcode
+                        print("sequences are different lengths")
+
+                    else:
+                        print("shouldn't have got to here - do the barcodes not have a length?")
+
+                    if re.search(shorter_seq, longer_seq) is not None: # this only works by finding the smaller seq within the longer seq  
+                        m = re.search(shorter_seq, longer_seq)
+                        info_message = f"found shorter_seq {shorter_seq} in longer_seq {longer_seq}. {getExtraBases(m, longer_seq)}"
+                        break
+
+                    # try the reverse complement of the sequence
+                    if re.search(reverseComplement(shorter_seq), longer_seq) is not None:
+                        m = re.search(reverseComplement(shorter_seq), longer_seq)
+                        info_message = f"found reverse comp of shorter_seq {shorter_seq} - {reverseComplement(shorter_seq)} in longer_seq {longer_seq}. {getExtraBases(m, longer_seq)}"
+                        break
+
+                    if re.search(reverseSeq(shorter_seq), longer_seq) is not None:
+                        m = re.search(reverseSeq(shorter_seq), longer_seq)
+                        info_message = f"found reverse of shorter_seq {shorter_seq} - {reverseSeq(shorter_seq)} in longer_seq {longer_seq}. {getExtraBases(m, longer_seq)}"
+                        break  
 
             if info_message is not None:
-                #print(f"found an explanation: {info_message}, MIA seq i = {i}")
+                print(f"found an explanation: {info_message}, MIA seq i = {i}")
                 observed_dict[observed]["explained"] = True
                 observed_dict[observed]["sierra"] = True
                 observed_dict[observed]["info"] = info_message
@@ -77,6 +107,17 @@ def main():
     write_sierra(observed_dict)
     write_info(observed_dict,mia_dict)
 
+
+def getExtraBases(m, longer_seq):
+    if m.span()[0] > 0:
+        first_matched_pos = m.span()[0]
+        extra_bases_at_start = longer_seq[:first_matched_pos]
+        return(f"Extra bases at start of sequence: {extra_bases_at_start}")
+
+    if m.span()[1] < len(longer_seq):
+        last_matched_pos = m.span()[1]
+        extra_bases_at_end = longer_seq[last_matched_pos:]
+        return(f"Extra bases at end of sequence: {extra_bases_at_end}")
 
 
 # Write output for new sierra barcode file
